@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Secrets - NEVER commit (requirement 7)
+# .env.example is NOT ignored: it documents the variables without real values.
+.env
+.env.local
+.env.*.local
+
+# Build output
+client/dist/
+dist/
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+
+# Temporary / OS / editor files
+*.tmp
+*.temp
+tmp/
+.DS_Store
+Thumbs.db
+desktop.ini
