@@ -14,6 +14,20 @@ export function getPosts(filters = {}) {
   });
 }
 
+// [REQ-20] Advanced search #1.
+// filters: { keyword, course, author, dateFrom, dateTo } - empty ones are not sent
+export function searchPosts(filters) {
+  const data = {};
+  Object.keys(filters).forEach((key) => {
+    if (filters[key]) data[key] = filters[key];
+  });
+  return $.ajax({
+    url: '/api/posts/search',
+    type: 'GET',
+    data // jQuery builds: /api/posts/search?keyword=...&course=...
+  });
+}
+
 export function getPost(id) {
   return $.ajax({
     url: '/api/posts/' + encodeURIComponent(id),

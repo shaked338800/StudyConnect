@@ -4,11 +4,13 @@ const {
   findPostById,
   findPostDetails,
   listPosts,
+  searchPosts,
   updatePost,
   deletePost
 } = require('../models/Post');
 const { findGroupById, isGroupMember } = require('../models/StudyGroup');
-const { isString, isValidObjectId, validatePost } = require('../utils/validators');
+const { findUserByUsername } = require('../models/User');
+const { isString, isValidObjectId, validatePost, parsePostSearch } = require('../utils/validators');
 const escapeRegex = require('../utils/escapeRegex');
 
 // [REQ-21] Is this user the author of the post?
@@ -42,6 +44,35 @@ async function getPosts(req, res) {
 
   const searchRegex = q && q.trim() ? new RegExp(escapeRegex(q.trim()), 'i') : null;
   const posts = await listPosts({ searchRegex, groupId: group });
+  res.json({ posts });
+}
+
+// [REQ-20] Advanced search #1
+// GET /api/posts/search?keyword=&course=&author=&dateFrom=YYYY-MM-DD&dateTo=YYYY-MM-DD
+// All parameters are optional and are combined with AND.
+async function advancedSearchPosts(req, res) {
+  const { error, filters } = parsePostSearch(req.query);
+  if (error) {
+    return res.status(400).json({ error });
+  }
+
+  // The author filter is a username; the posts store the author's id
+  let authorId = null;
+  if (filters.author) {
+    const author = await findUserByUsername(filters.author);
+    if (!author) {
+      return res.json({ posts: [] }); // no such user -> no posts (not an error)
+    }
+    authorId = author._id;
+  }
+
+  const posts = await searchPosts({
+    keywordRegex: filters.keyword ? new RegExp(escapeRegex(filters.keyword), 'i') : null,
+    courseRegex: filters.course ? new RegExp(escapeRegex(filters.course), 'i') : null,
+    authorId,
+    dateFrom: filters.dateFrom,
+    dateTo: filters.dateTo
+  });
   res.json({ posts });
 }
 
@@ -119,4 +150,11 @@ async function deleteExistingPost(req, res) {
   res.json({ message: 'Post deleted' });
 }
 
-module.exports = { getPosts, getPost, createNewPost, updateExistingPost, deleteExistingPost };
+module.exports = {
+  getPosts,
+  advancedSearchPosts,
+  getPost,
+  createNewPost,
+  updateExistingPost,
+  deleteExistingPost
+};

@@ -106,6 +106,40 @@ export function validatePostForm(form) {
   return errors;
 }
 
+// ---------- [REQ-20] Advanced search forms ----------
+
+function checkSearchLength(form, field, errors) {
+  if (form[field].trim().length > 50) {
+    errors[field] = 'At most 50 characters';
+  }
+}
+
+// Dates come from <input type="date"> as "YYYY-MM-DD", so comparing the
+// strings also compares the dates.
+export function validatePostSearchForm(form) {
+  const errors = {};
+  checkSearchLength(form, 'keyword', errors);
+  checkSearchLength(form, 'course', errors);
+  const author = form.author.trim();
+  if (author !== '' && !/^[a-zA-Z0-9_]{1,20}$/.test(author)) {
+    errors.author = 'A username: letters, numbers or _';
+  }
+  if (form.dateFrom && form.dateTo && form.dateFrom > form.dateTo) {
+    errors.dateTo = '"To" date must be on or after the "From" date';
+  }
+  return errors;
+}
+
+export function validateGroupSearchForm(form) {
+  const errors = {};
+  checkSearchLength(form, 'course', errors);
+  checkSearchLength(form, 'institution', errors);
+  if (form.studyFormat !== '' && !STUDY_FORMATS.includes(form.studyFormat)) {
+    errors.studyFormat = 'Please choose a study format';
+  }
+  return errors;
+}
+
 // True when the errors object has no keys
 export function isValid(errors) {
   return Object.keys(errors).length === 0;

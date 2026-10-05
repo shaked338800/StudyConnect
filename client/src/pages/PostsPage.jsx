@@ -1,11 +1,23 @@
 import { useEffect, useState } from 'react';
 import PostCard from '../components/PostCard';
 import PostForm from '../components/PostForm';
-import { getPosts, createPost } from '../api/postsApi';
+import PostSearchForm from '../components/PostSearchForm';
+import { getPosts, searchPosts, createPost } from '../api/postsApi';
 import { getGroups } from '../api/groupsApi';
 import { notify } from '../jquery/notify';
 
-// [REQ-19 Post - Create + List + Search]
+// Readable summary of the advanced filters, e.g. 'course "calc", from 2026-03-01'
+function describePostFilters(f) {
+  const parts = [];
+  if (f.keyword) parts.push(`keyword "${f.keyword}"`);
+  if (f.course) parts.push(`course "${f.course}"`);
+  if (f.author) parts.push(`author @${f.author}`);
+  if (f.dateFrom) parts.push(`from ${f.dateFrom}`);
+  if (f.dateTo) parts.push(`to ${f.dateTo}`);
+  return parts.length ? parts.join(', ') : 'no filters (all posts)';
+}
+
+// [REQ-19 Post - Create + List + Search] [REQ-20 advanced search #1]
 function PostsPage({ user, onNavigate }) {
   const [posts, setPosts] = useState([]);
   const [loaded, setLoaded] = useState(false);
@@ -13,12 +25,15 @@ function PostsPage({ user, onNavigate }) {
   const [searchError, setSearchError] = useState('');
   const [creating, setCreating] = useState(false);
   const [myGroupOptions, setMyGroupOptions] = useState([]);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [resultInfo, setResultInfo] = useState(''); // what the list below is showing
 
   async function loadPosts(q) {
     try {
       const data = await getPosts({ q });
       setPosts(data.posts);
       setLoaded(true);
+      setResultInfo(q ? `Simple search "${q}"` : '');
     } catch {
       // toast shown by the global ajaxError handler
     }
@@ -63,6 +78,19 @@ function PostsPage({ user, onNavigate }) {
     loadPosts('');
   }
 
+  // [REQ-20] Called by PostSearchForm with validated filters
+  async function handleAdvancedSearch(filters) {
+    try {
+      const data = await searchPosts(filters);
+      setPosts(data.posts);
+      setLoaded(true);
+      setSearchText('');
+      setResultInfo('Advanced search: ' + describePostFilters(filters));
+    } catch {
+      // e.g. invalid date - global ajaxError toast
+    }
+  }
+
   return (
     <>
       <section className="card">
@@ -83,14 +111,23 @@ function PostsPage({ user, onNavigate }) {
             type="text"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            placeholder="Search posts by keyword (title, content or course)"
+            placeholder="Quick search: keyword in title, content or course"
             maxLength={50}
           />
           <button className="btn" type="submit">Search</button>
           <button className="btn btn-secondary" type="button" onClick={handleClear}>Clear</button>
         </form>
         {searchError && <p className="field-error">{searchError}</p>}
+
+        <button className="link-button" onClick={() => setShowAdvanced(!showAdvanced)}>
+          {showAdvanced ? 'Hide advanced search' : 'Advanced search (filters)...'}
+        </button>
+        {showAdvanced && <PostSearchForm onSearch={handleAdvancedSearch} onReset={() => loadPosts('')} />}
       </section>
+
+      {resultInfo && (
+        <p className="result-info">{resultInfo} - {posts.length} result{posts.length === 1 ? '' : 's'}</p>
+      )}
 
       {loaded && posts.length === 0 && (
         <section className="card"><p className="muted">No posts found.</p></section>

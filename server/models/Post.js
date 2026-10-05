@@ -61,6 +61,31 @@ function listPosts({ searchRegex, groupId } = {}) {
   return populatePost(Post.find(filter).sort({ createdAt: -1 }).limit(100));
 }
 
+// [REQ-20] Advanced search #1. Every filter that is given is ADDED to the
+// MongoDB filter object, so a post must match ALL of them (logical AND).
+//   keywordRegex - title OR content contains it
+//   courseRegex  - course contains it
+//   authorId     - exact author
+//   dateFrom / dateTo - createdAt between them (each one optional)
+function searchPosts({ keywordRegex, courseRegex, authorId, dateFrom, dateTo }) {
+  const filter = {};
+  if (keywordRegex) {
+    filter.$or = [{ title: keywordRegex }, { content: keywordRegex }];
+  }
+  if (courseRegex) {
+    filter.course = courseRegex;
+  }
+  if (authorId) {
+    filter.author = authorId;
+  }
+  if (dateFrom || dateTo) {
+    filter.createdAt = {};
+    if (dateFrom) filter.createdAt.$gte = dateFrom; // greater than or equal
+    if (dateTo) filter.createdAt.$lte = dateTo;     // less than or equal
+  }
+  return populatePost(Post.find(filter).sort({ createdAt: -1 }).limit(100));
+}
+
 function updatePost(id, changes) {
   return Post.findByIdAndUpdate(id, { $set: changes }, { new: true, runValidators: true });
 }
@@ -84,6 +109,7 @@ module.exports = {
   findPostById,
   findPostDetails,
   listPosts,
+  searchPosts,
   updatePost,
   deletePost,
   deletePostsByGroup,

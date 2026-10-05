@@ -116,6 +116,118 @@ function validatePost(body) {
   return null;
 }
 
+// ---------- [REQ-20] Advanced search parameters ----------
+
+const MAX_SEARCH_LENGTH = 50;
+const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+const USERNAME_SEARCH_REGEX = /^[a-zA-Z0-9_]{1,20}$/;
+
+// Optional text filter from the query string. Returns { value } or { error }.
+// Missing or empty -> value ''. Query parameters must be ONE string
+// (?course=a&course=b would arrive as an array -> rejected).
+function readSearchText(query, name, label) {
+  const value = query[name];
+  if (value === undefined) return { value: '' };
+  if (!isString(value)) return { error: `${label} must be text` };
+  if (value.trim().length > MAX_SEARCH_LENGTH) {
+    return { error: `${label} must be at most ${MAX_SEARCH_LENGTH} characters` };
+  }
+  return { value: value.trim() };
+}
+
+// "2026-10-05" -> Date at 00:00 local time on that day, or null if invalid.
+// We rebuild the date and compare, so impossible dates like 2026-02-30 are rejected.
+function parseDateOnly(text) {
+  if (!DATE_REGEX.test(text)) return null;
+  const [year, month, day] = text.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+    return null;
+  }
+  return date;
+}
+
+// Reads a date filter. Returns { value: Date | null } or { error }.
+function readSearchDate(query, name, label) {
+  const text = readSearchText(query, name, label);
+  if (text.error) return text;
+  if (text.value === '') return { value: null };
+  const date = parseDateOnly(text.value);
+  if (!date) return { error: `${label} must be a valid date (YYYY-MM-DD)` };
+  return { value: date };
+}
+
+// Advanced search #1 - posts. Returns { error } or { filters }.
+//   keyword  - contained in title or content
+//   course   - contained in course
+//   author   - exact username
+//   dateFrom - posts created on or after this day (from 00:00)
+//   dateTo   - posts created on or before this day (until 23:59:59.999)
+function parsePostSearch(query) {
+  const keyword = readSearchText(query, 'keyword', 'Keyword');
+  const course = readSearchText(query, 'course', 'Course');
+  const author = readSearchText(query, 'author', 'Author');
+  const dateFrom = readSearchDate(query, 'dateFrom', 'From date');
+  const dateTo = readSearchDate(query, 'dateTo', 'To date');
+
+  const firstError = [keyword, course, author, dateFrom, dateTo].find((r) => r.error);
+  if (firstError) return { error: firstError.error };
+
+  if (author.value !== '' && !USERNAME_SEARCH_REGEX.test(author.value)) {
+    return { error: 'Author must be a username (letters, numbers or _)' };
+  }
+
+  let dateToEnd = null;
+  if (dateTo.value) {
+    // include the whole "to" day
+    dateToEnd = new Date(dateTo.value);
+    dateToEnd.setHours(23, 59, 59, 999);
+  }
+  if (dateFrom.value && dateToEnd && dateFrom.value > dateToEnd) {
+    return { error: 'From date must be before or equal to To date' };
+  }
+
+  return {
+    filters: {
+      keyword: keyword.value,
+      course: course.value,
+      author: author.value.toLowerCase(),
+      dateFrom: dateFrom.value,
+      dateTo: dateToEnd
+    }
+  };
+}
+
+// Advanced search #2 - study groups. Returns { error } or { filters }.
+//   course, institution - contained in the field
+//   studyFormat         - exactly one of the formats ('' = any)
+//   openSpots           - 'true' = only groups where members < maxMembers
+function parseGroupSearch(query) {
+  const course = readSearchText(query, 'course', 'Course');
+  const institution = readSearchText(query, 'institution', 'Institution');
+  const studyFormat = readSearchText(query, 'studyFormat', 'Study format');
+  const openSpots = readSearchText(query, 'openSpots', 'Open spots');
+
+  const firstError = [course, institution, studyFormat, openSpots].find((r) => r.error);
+  if (firstError) return { error: firstError.error };
+
+  if (studyFormat.value !== '' && !STUDY_FORMATS.includes(studyFormat.value)) {
+    return { error: 'Study format must be online, in-person or hybrid' };
+  }
+  if (!['', 'true', 'false'].includes(openSpots.value)) {
+    return { error: 'Open spots must be true or false' };
+  }
+
+  return {
+    filters: {
+      course: course.value,
+      institution: institution.value,
+      studyFormat: studyFormat.value,
+      onlyOpenSpots: openSpots.value === 'true'
+    }
+  };
+}
+
 module.exports = {
   isString,
   isValidObjectId,
@@ -123,5 +235,7 @@ module.exports = {
   validateLogin,
   validateProfileUpdate,
   validateGroup,
-  validatePost
+  validatePost,
+  parsePostSearch,
+  parseGroupSearch
 };

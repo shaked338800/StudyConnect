@@ -5,6 +5,7 @@ const requireAuth = require('../middleware/requireAuth');
 const validateId = require('../middleware/validateId');
 const {
   getGroups,
+  advancedSearchGroups,
   getGroup,
   createNewGroup,
   updateExistingGroup,
@@ -19,6 +20,9 @@ router.use(requireAuth);
 
 router.get('/', getGroups);
 router.post('/', createNewGroup);
+
+// "/search" must come before "/:id", otherwise "search" would be treated as an id
+router.get('/search', advancedSearchGroups);
 
 router.get('/:id', validateId, getGroup);
 router.put('/:id', validateId, updateExistingGroup);

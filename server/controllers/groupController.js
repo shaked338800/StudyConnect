@@ -8,10 +8,11 @@ const {
   deleteGroup,
   addMember,
   removeMember,
-  isGroupMember
+  isGroupMember,
+  searchGroups
 } = require('../models/StudyGroup');
 const { deletePostsByGroup } = require('../models/Post');
-const { isString, validateGroup } = require('../utils/validators');
+const { isString, validateGroup, parseGroupSearch } = require('../utils/validators');
 const escapeRegex = require('../utils/escapeRegex');
 
 // [REQ-21] Is this user the owner of the group?
@@ -43,6 +44,24 @@ async function getGroups(req, res) {
 
   const search = q && q.trim() ? new RegExp(escapeRegex(q.trim()), 'i') : null;
   const groups = await listGroups(search);
+  res.json({ groups });
+}
+
+// [REQ-20] Advanced search #2
+// GET /api/groups/search?course=&institution=&studyFormat=&openSpots=true
+// All parameters are optional and are combined with AND.
+async function advancedSearchGroups(req, res) {
+  const { error, filters } = parseGroupSearch(req.query);
+  if (error) {
+    return res.status(400).json({ error });
+  }
+
+  const groups = await searchGroups({
+    courseRegex: filters.course ? new RegExp(escapeRegex(filters.course), 'i') : null,
+    institutionRegex: filters.institution ? new RegExp(escapeRegex(filters.institution), 'i') : null,
+    studyFormat: filters.studyFormat,
+    onlyOpenSpots: filters.onlyOpenSpots
+  });
   res.json({ groups });
 }
 
@@ -153,6 +172,7 @@ async function leaveGroup(req, res) {
 
 module.exports = {
   getGroups,
+  advancedSearchGroups,
   getGroup,
   createNewGroup,
   updateExistingGroup,

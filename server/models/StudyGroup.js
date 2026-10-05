@@ -69,6 +69,33 @@ function listGroups(searchRegex) {
     .limit(100);
 }
 
+// [REQ-20] Advanced search #2. Every filter that is given is ADDED to the
+// MongoDB filter object, so a group must match ALL of them (logical AND).
+//   courseRegex, institutionRegex - the field contains the text
+//   studyFormat   - exact format
+//   onlyOpenSpots - number of members is less than maxMembers
+function searchGroups({ courseRegex, institutionRegex, studyFormat, onlyOpenSpots }) {
+  const filter = {};
+  if (courseRegex) {
+    filter.course = courseRegex;
+  }
+  if (institutionRegex) {
+    filter.institution = institutionRegex;
+  }
+  if (studyFormat) {
+    filter.studyFormat = studyFormat;
+  }
+  if (onlyOpenSpots) {
+    // $expr lets us compare two fields of the same document:
+    // size of the members array < maxMembers
+    filter.$expr = { $lt: [{ $size: '$members' }, '$maxMembers'] };
+  }
+  return StudyGroup.find(filter)
+    .populate('owner', USER_SUMMARY)
+    .sort({ createdAt: -1 })
+    .limit(100);
+}
+
 function updateGroup(id, changes) {
   return StudyGroup.findByIdAndUpdate(id, { $set: changes }, { new: true, runValidators: true });
 }
@@ -118,6 +145,7 @@ module.exports = {
   findGroupById,
   findGroupDetails,
   listGroups,
+  searchGroups,
   updateGroup,
   deleteGroup,
   addMember,

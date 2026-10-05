@@ -81,6 +81,11 @@ function findPublicUserById(id) {
   return User.findById(id).select(PUBLIC_FIELDS);
 }
 
+// Used by the advanced post search ("author" filter). Returns the user or null.
+function findUserByUsername(username) {
+  return User.findOne({ username: username.toLowerCase() }).select('_id');
+}
+
 // List users; if searchRegex is given, match it against several fields
 function listUsers(searchRegex) {
   const filter = searchRegex
@@ -110,6 +115,7 @@ module.exports = {
   checkPassword,
   findUserById,
   findPublicUserById,
+  findUserByUsername,
   listUsers,
   updateUser,
   deleteUserById

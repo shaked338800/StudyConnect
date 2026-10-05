@@ -10,6 +10,21 @@ export function getGroups(q) {
   });
 }
 
+// [REQ-20] Advanced search #2.
+// filters: { course, institution, studyFormat, openSpots (boolean) }
+export function searchGroups(filters) {
+  const data = {};
+  if (filters.course) data.course = filters.course;
+  if (filters.institution) data.institution = filters.institution;
+  if (filters.studyFormat) data.studyFormat = filters.studyFormat;
+  if (filters.openSpots) data.openSpots = 'true';
+  return $.ajax({
+    url: '/api/groups/search',
+    type: 'GET',
+    data
+  });
+}
+
 export function getGroup(id) {
   return $.ajax({
     url: '/api/groups/' + encodeURIComponent(id),
