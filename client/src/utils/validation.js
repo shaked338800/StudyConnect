@@ -52,6 +52,36 @@ export function validateProfileForm(form) {
   return errors;
 }
 
+export const STUDY_FORMATS = ['online', 'in-person', 'hybrid'];
+
+// form.maxMembers is the text from the input, so we convert it to a number first
+export function validateGroupForm(form) {
+  const errors = {};
+  const name = form.name.trim();
+  const course = form.course.trim();
+  const maxMembers = Number(form.maxMembers);
+
+  if (name.length < 3 || name.length > 60) {
+    errors.name = 'Group name must be 3-60 characters';
+  }
+  if (course.length < 2 || course.length > 60) {
+    errors.course = 'Course must be 2-60 characters';
+  }
+  if (!STUDY_FORMATS.includes(form.studyFormat)) {
+    errors.studyFormat = 'Please choose a study format';
+  }
+  if (form.maxMembers === '' || !Number.isInteger(maxMembers) || maxMembers < 2 || maxMembers > 100) {
+    errors.maxMembers = 'A whole number between 2 and 100';
+  }
+  if (form.description.trim().length > 500) {
+    errors.description = 'At most 500 characters';
+  }
+  if (form.institution.trim().length > 80) {
+    errors.institution = 'At most 80 characters';
+  }
+  return errors;
+}
+
 // True when the errors object has no keys
 export function isValid(errors) {
   return Object.keys(errors).length === 0;

@@ -268,6 +268,104 @@ textarea:focus {
   margin-bottom: 0;
 }
 
+.small {
+  font-size: 0.8rem;
+}
+
+select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ced4da;
+  border-radius: 6px; /* [REQ-27 border-radius] */
+  font: inherit;
+  background: #fff;
+}
+
+.card-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.inner-form {
+  background: #f8f9fc;
+  border-radius: var(--radius); /* [REQ-27 border-radius] */
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+/* ---- Groups ---- */
+
+/* [REQ-27 multiple-columns] Group cards flow into 2 columns
+   (like a newspaper), and 1 column on narrow screens. */
+.groups-grid {
+  column-count: 2;
+  column-gap: 16px;
+  margin-top: 16px;
+}
+
+.group-card {
+  break-inside: avoid; /* keep each card whole inside one column */
+  margin-bottom: 16px;
+  background: var(--color-surface);
+  padding: 16px;
+  border-radius: var(--radius); /* [REQ-27 border-radius] */
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease; /* [REQ-27 transition] */
+}
+
+.group-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+}
+
+.group-card h3 {
+  margin: 0 0 4px;
+}
+
+.group-description {
+  margin: 8px 0;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.badge {
+  display: inline-block;
+  background: #e7ecff;
+  color: var(--color-primary-dark);
+  padding: 2px 10px;
+  border-radius: 999px; /* [REQ-27 border-radius] - pill shape */
+  font-size: 0.8rem;
+  margin-left: 4px;
+}
+
+.badges .badge {
+  margin-left: 0;
+}
+
+.badge-good {
+  background: #d3f9d8;
+  color: var(--color-good);
+}
+
+.badge-bad {
+  background: #ffe3e3;
+  color: var(--color-bad);
+}
+
+@media (max-width: 640px) {
+  .groups-grid {
+    column-count: 1;
+  }
+}
+
 /* ---- jQuery-owned elements (outside #root) ---- */
 
 #loading {

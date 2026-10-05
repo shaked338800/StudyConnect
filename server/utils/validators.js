@@ -70,10 +70,34 @@ function validateProfileUpdate(body) {
   return checkEmail(body.email) || checkFullName(body.fullName) || checkProfileFields(body);
 }
 
+const STUDY_FORMATS = ['online', 'in-person', 'hybrid'];
+
+// Used for both creating and editing a study group
+function validateGroup(body) {
+  if (!isString(body.name) || body.name.trim().length < 3 || body.name.trim().length > 60) {
+    return 'Group name must be 3-60 characters';
+  }
+  if (!isString(body.course) || body.course.trim().length < 2 || body.course.trim().length > 60) {
+    return 'Course must be 2-60 characters';
+  }
+  if (!STUDY_FORMATS.includes(body.studyFormat)) {
+    return 'Study format must be online, in-person or hybrid';
+  }
+  // Must be a real whole number (not "10", not 2.5)
+  if (!Number.isInteger(body.maxMembers) || body.maxMembers < 2 || body.maxMembers > 100) {
+    return 'Max members must be a whole number between 2 and 100';
+  }
+  return (
+    checkOptionalText(body.description, 'Description', 500) ||
+    checkOptionalText(body.institution, 'Institution', 80)
+  );
+}
+
 module.exports = {
   isString,
   isValidObjectId,
   validateRegister,
   validateLogin,
-  validateProfileUpdate
+  validateProfileUpdate,
+  validateGroup
 };

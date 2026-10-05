@@ -7,6 +7,7 @@ const sessionMiddleware = require('./config/session');
 const healthRoutes = require('./routes/healthRoutes');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
+const groupRoutes = require('./routes/groupRoutes');
 const notFound = require('./middleware/notFound');
 const errorHandler = require('./middleware/errorHandler');
 
@@ -22,6 +23,7 @@ app.use(sessionMiddleware);
 app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/groups', groupRoutes);
 
 // Unknown /api routes -> JSON 404
 app.use('/api', notFound);

@@ -7,6 +7,7 @@ const {
   deleteUserById,
   checkPassword
 } = require('../models/User');
+const { countGroupsOwnedBy, removeUserFromAllGroups } = require('../models/StudyGroup');
 const { isString, validateProfileUpdate } = require('../utils/validators');
 const escapeRegex = require('../utils/escapeRegex');
 
@@ -81,7 +82,16 @@ async function deleteMyAccount(req, res, next) {
     return res.status(401).json({ error: 'Wrong password' });
   }
 
-  // Later phases: handle the user's groups / posts / messages here as well
+  // A group must always have an owner, so owners must delete their groups first
+  const ownedGroups = await countGroupsOwnedBy(req.userId);
+  if (ownedGroups > 0) {
+    return res.status(409).json({
+      error: `You own ${ownedGroups} study group(s). Delete them before deleting your account.`
+    });
+  }
+
+  // Later phases: handle the user's posts / messages here as well
+  await removeUserFromAllGroups(req.userId);
   await deleteUserById(req.userId);
 
   req.session.destroy((err) => {

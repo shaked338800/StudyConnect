@@ -18,6 +18,7 @@ function NavBar({ user, page, onNavigate, onLogout }) {
         {user ? (
           <>
             {link('home', 'Home')}
+            {link('groups', 'Groups')}
             {link('people', 'People')}
             {link('myProfile', 'My Profile')}
             <span className="nav-user">@{user.username}</span>

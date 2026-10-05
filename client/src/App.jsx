@@ -7,6 +7,8 @@ import RegisterPage from './pages/RegisterPage';
 import PeoplePage from './pages/PeoplePage';
 import UserProfilePage from './pages/UserProfilePage';
 import MyProfilePage from './pages/MyProfilePage';
+import GroupsPage from './pages/GroupsPage';
+import GroupPage from './pages/GroupPage';
 import { getMe, logout } from './api/authApi';
 import { notify } from './jquery/notify';
 
@@ -89,6 +91,11 @@ function App() {
     }
 
     switch (currentPage) {
+      case 'groups':
+        return <GroupsPage user={user} onNavigate={navigate} />;
+      case 'group':
+        // key: a different groupId creates a fresh GroupPage
+        return <GroupPage key={params.groupId} groupId={params.groupId} user={user} onNavigate={navigate} />;
       case 'people':
         return <PeoplePage onNavigate={navigate} />;
       case 'user':
