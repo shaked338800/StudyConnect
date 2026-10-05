@@ -12,6 +12,7 @@ import GroupPage from './pages/GroupPage';
 import PostsPage from './pages/PostsPage';
 import PostPage from './pages/PostPage';
 import SketchPage from './pages/SketchPage';
+import StatsPage from './pages/StatsPage';
 import { getMe, logout } from './api/authApi';
 import { notify } from './jquery/notify';
 import socket from './socket';
@@ -116,6 +117,8 @@ function App() {
         return <GroupPage key={params.groupId} groupId={params.groupId} user={user} onNavigate={navigate} />;
       case 'sketch':
         return <SketchPage />;
+      case 'stats':
+        return <StatsPage />;
       case 'people':
         return <PeoplePage onNavigate={navigate} />;
       case 'user':

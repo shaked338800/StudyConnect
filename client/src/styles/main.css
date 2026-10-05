@@ -521,6 +521,70 @@ code {
   border-color: var(--color-primary);
 }
 
+/* ---- [REQ-29] D3 charts ---- */
+
+.chart-container {
+  position: relative; /* the D3 tooltip is positioned inside it */
+}
+
+.chart-container svg {
+  display: block;
+  width: 100%;  /* the SVG viewBox scales the chart to this width */
+  height: auto;
+  font-family: system-ui, 'Segoe UI', sans-serif;
+}
+
+.chart-tooltip {
+  position: absolute;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  padding: 6px 10px;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 6px; /* [REQ-27 border-radius] */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  font-size: 0.85rem;
+  white-space: nowrap;
+  transition: opacity 0.15s ease; /* [REQ-27 transition] */
+}
+
+.chart-tooltip span {
+  color: var(--color-muted);
+}
+
+.chart-empty {
+  padding: 32px;
+  text-align: center;
+  color: var(--color-muted);
+  background: #f8f9fc;
+  border-radius: var(--radius); /* [REQ-27 border-radius] */
+}
+
+.chart-table {
+  margin-top: 8px;
+  font-size: 0.9rem;
+}
+
+.chart-table summary {
+  cursor: pointer;
+  color: var(--color-primary);
+}
+
+.chart-table table {
+  margin-top: 8px;
+  border-collapse: collapse;
+  min-width: 260px;
+}
+
+.chart-table th,
+.chart-table td {
+  text-align: left;
+  padding: 4px 12px;
+  border-bottom: 1px solid #eef0f5;
+  font-variant-numeric: tabular-nums;
+}
+
 /* ---- [REQ-28] Group chat ---- */
 
 .chat {

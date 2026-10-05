@@ -104,6 +104,80 @@ function deletePostsByAuthor(authorId) {
   return Post.deleteMany({ author: authorId });
 }
 
+// ---------- [REQ-29] Statistics (aggregation pipelines) ----------
+
+const TOP_COURSES = 10;
+
+// Number of posts per course, biggest first.
+// "Calculus 1" and "calculus 1" are counted as the same course: we group by
+// the lower-case name and show the first spelling we meet.
+// If there are more than 10 courses, the rest are summed into "Other".
+async function countPostsByCourse() {
+  const rows = await Post.aggregate([
+    {
+      $group: {
+        _id: { $toLower: '$course' },  // one group per course name (any case)
+        course: { $first: '$course' }, // a display name for it
+        count: { $sum: 1 }             // add 1 for every post in the group
+      }
+    },
+    { $sort: { count: -1, _id: 1 } }   // most posts first, then A-Z
+  ]);
+
+  const result = rows.slice(0, TOP_COURSES).map((r) => ({ course: r.course, count: r.count }));
+  const rest = rows.slice(TOP_COURSES);
+  if (rest.length > 0) {
+    result.push({ course: 'Other', count: rest.reduce((sum, r) => sum + r.count, 0) });
+  }
+  return result;
+}
+
+// Dates are grouped in the server's own time zone (the same one the advanced
+// search uses), so a post written at 00:30 on Feb 1 counts for February.
+const TIME_ZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+// Number of posts per month, oldest first.
+// We group by YEAR + MONTH, so January 2026 and January 2027 stay separate.
+// Months with no posts are filled in with 0, so the line chart doesn't
+// connect e.g. January straight to April as if nothing happened in between.
+async function countPostsByMonth() {
+  const rows = await Post.aggregate([
+    {
+      $group: {
+        _id: {
+          year: { $year: { date: '$createdAt', timezone: TIME_ZONE } },
+          month: { $month: { date: '$createdAt', timezone: TIME_ZONE } }
+        },
+        count: { $sum: 1 }
+      }
+    },
+    { $sort: { '_id.year': 1, '_id.month': 1 } } // chronological order
+  ]);
+  if (rows.length === 0) return [];
+
+  // Walk month by month from the first to the last month that has posts
+  const counts = new Map(rows.map((r) => [`${r._id.year}-${r._id.month}`, r.count]));
+  const first = rows[0]._id;
+  const last = rows[rows.length - 1]._id;
+  const result = [];
+  let year = first.year;
+  let month = first.month;
+  while (year < last.year || (year === last.year && month <= last.month)) {
+    result.push({
+      year,
+      month,
+      label: `${year}-${String(month).padStart(2, '0')}`, // e.g. "2026-03"
+      count: counts.get(`${year}-${month}`) || 0
+    });
+    month += 1;
+    if (month === 13) {
+      month = 1;
+      year += 1;
+    }
+  }
+  return result;
+}
+
 module.exports = {
   createPost,
   findPostById,
@@ -113,5 +187,7 @@ module.exports = {
   updatePost,
   deletePost,
   deletePostsByGroup,
-  deletePostsByAuthor
+  deletePostsByAuthor,
+  countPostsByCourse,
+  countPostsByMonth
 };
