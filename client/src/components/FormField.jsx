@@ -1,18 +1,21 @@
 // A label + input (or textarea / select) + error message.
 // Used by every form so they all look and behave the same.
 // - multiline: renders a <textarea>
-// - options:   renders a <select> with these values, e.g. ['online', 'hybrid']
-function FormField({ label, name, value, onChange, error, type = 'text', multiline = false, options, maxLength, min, max, placeholder }) {
+// - options:   renders a <select>. Each option is either a string ('online')
+//              or an object { value, label }. emptyLabel is the text of the "" option.
+function FormField({ label, name, value, onChange, error, type = 'text', multiline = false, options, emptyLabel = '-- choose --', maxLength, min, max, placeholder }) {
   const className = error ? 'input-error' : '';
 
   let input;
   if (options) {
     input = (
       <select id={name} name={name} value={value} onChange={onChange} className={className}>
-        <option value="">-- choose --</option>
-        {options.map((option) => (
-          <option key={option} value={option}>{option}</option>
-        ))}
+        <option value="">{emptyLabel}</option>
+        {options.map((option) => {
+          const optionValue = typeof option === 'string' ? option : option.value;
+          const optionLabel = typeof option === 'string' ? option : option.label;
+          return <option key={optionValue} value={optionValue}>{optionLabel}</option>;
+        })}
       </select>
     );
   } else if (multiline) {

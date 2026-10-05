@@ -8,6 +8,7 @@ const {
   checkPassword
 } = require('../models/User');
 const { countGroupsOwnedBy, removeUserFromAllGroups } = require('../models/StudyGroup');
+const { deletePostsByAuthor } = require('../models/Post');
 const { isString, validateProfileUpdate } = require('../utils/validators');
 const escapeRegex = require('../utils/escapeRegex');
 
@@ -90,7 +91,8 @@ async function deleteMyAccount(req, res, next) {
     });
   }
 
-  // Later phases: handle the user's posts / messages here as well
+  // The user's posts are deleted with the account (later: their chat messages too)
+  await deletePostsByAuthor(req.userId);
   await removeUserFromAllGroups(req.userId);
   await deleteUserById(req.userId);
 

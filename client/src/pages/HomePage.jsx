@@ -29,7 +29,7 @@ function HomePage({ user }) {
     <>
       <section className="card">
         <h2>Welcome, {user.fullName}!</h2>
-        <p className="muted">Find or create a study group under Groups. Posts and chat are coming in the next phases.</p>
+        <p className="muted">Share study notes under Posts, or find and create a study group under Groups. Chat is coming in a later phase.</p>
       </section>
 
       <section className="card">

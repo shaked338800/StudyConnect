@@ -360,6 +360,43 @@ select {
   color: var(--color-bad);
 }
 
+/* ---- Posts ---- */
+
+.post-list {
+  margin-top: 16px;
+}
+
+.post-card {
+  background: var(--color-surface);
+  padding: 16px;
+  margin-bottom: 12px;
+  border: 1px solid #eef0f5;
+  border-radius: var(--radius); /* [REQ-27 border-radius] */
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease; /* [REQ-27 transition] */
+}
+
+.post-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.post-card h3 {
+  margin: 0 0 4px;
+}
+
+.post-preview {
+  margin: 8px 0;
+  white-space: pre-wrap;
+}
+
+.post-content {
+  white-space: pre-wrap; /* keep the author's line breaks */
+  line-height: 1.6;
+  margin: 16px 0;
+}
+
 @media (max-width: 640px) {
   .groups-grid {
     column-count: 1;

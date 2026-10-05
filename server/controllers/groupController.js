@@ -7,8 +7,10 @@ const {
   updateGroup,
   deleteGroup,
   addMember,
-  removeMember
+  removeMember,
+  isGroupMember
 } = require('../models/StudyGroup');
+const { deletePostsByGroup } = require('../models/Post');
 const { isString, validateGroup } = require('../utils/validators');
 const escapeRegex = require('../utils/escapeRegex');
 
@@ -16,10 +18,6 @@ const escapeRegex = require('../utils/escapeRegex');
 // group.owner is an ObjectId, req.userId is a string - so compare as strings.
 function isOwner(group, userId) {
   return group.owner.toString() === userId;
-}
-
-function isMember(group, userId) {
-  return group.members.some((memberId) => memberId.toString() === userId);
 }
 
 // Only these fields come from the request body. owner and members can
@@ -107,7 +105,8 @@ async function deleteExistingGroup(req, res) {
     return res.status(403).json({ error: 'Only the group owner can delete this group' });
   }
 
-  // Later phases: also delete the group's posts and chat messages here
+  // Deleting a group also deletes its posts (later: its chat messages too)
+  await deletePostsByGroup(group._id);
   await deleteGroup(group._id);
   res.json({ message: 'Group deleted' });
 }
@@ -118,7 +117,7 @@ async function joinGroup(req, res) {
   if (!group) {
     return res.status(404).json({ error: 'Group not found' });
   }
-  if (isMember(group, req.userId)) {
+  if (isGroupMember(group, req.userId)) {
     return res.status(409).json({ error: 'You are already a member of this group' });
   }
   if (group.members.length >= group.maxMembers) {
@@ -144,7 +143,7 @@ async function leaveGroup(req, res) {
   if (isOwner(group, req.userId)) {
     return res.status(400).json({ error: 'The owner cannot leave the group. Delete the group instead.' });
   }
-  if (!isMember(group, req.userId)) {
+  if (!isGroupMember(group, req.userId)) {
     return res.status(409).json({ error: 'You are not a member of this group' });
   }
 

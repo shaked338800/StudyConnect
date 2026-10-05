@@ -93,11 +93,35 @@ function validateGroup(body) {
   );
 }
 
+// A direct link to a video file, e.g. https://example.com/lecture.mp4
+const VIDEO_URL_REGEX = /^https?:\/\/\S+\.(mp4|webm)(\?\S*)?$/i;
+
+// Fields that can be set when creating AND editing a post.
+// (group is only chosen on create - it is checked in the controller)
+function validatePost(body) {
+  if (!isString(body.title) || body.title.trim().length < 3 || body.title.trim().length > 100) {
+    return 'Title must be 3-100 characters';
+  }
+  if (!isString(body.content) || body.content.trim().length < 1 || body.content.trim().length > 5000) {
+    return 'Content must be 1-5000 characters';
+  }
+  if (!isString(body.course) || body.course.trim().length < 2 || body.course.trim().length > 60) {
+    return 'Course must be 2-60 characters';
+  }
+  if (body.videoUrl !== undefined && body.videoUrl !== '') {
+    if (!isString(body.videoUrl) || body.videoUrl.length > 500 || !VIDEO_URL_REGEX.test(body.videoUrl.trim())) {
+      return 'Video URL must be an http(s) link to a .mp4 or .webm file';
+    }
+  }
+  return null;
+}
+
 module.exports = {
   isString,
   isValidObjectId,
   validateRegister,
   validateLogin,
   validateProfileUpdate,
-  validateGroup
+  validateGroup,
+  validatePost
 };

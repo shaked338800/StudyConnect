@@ -9,6 +9,8 @@ import UserProfilePage from './pages/UserProfilePage';
 import MyProfilePage from './pages/MyProfilePage';
 import GroupsPage from './pages/GroupsPage';
 import GroupPage from './pages/GroupPage';
+import PostsPage from './pages/PostsPage';
+import PostPage from './pages/PostPage';
 import { getMe, logout } from './api/authApi';
 import { notify } from './jquery/notify';
 
@@ -91,6 +93,10 @@ function App() {
     }
 
     switch (currentPage) {
+      case 'posts':
+        return <PostsPage user={user} onNavigate={navigate} />;
+      case 'post':
+        return <PostPage key={params.postId} postId={params.postId} user={user} onNavigate={navigate} />;
       case 'groups':
         return <GroupsPage user={user} onNavigate={navigate} />;
       case 'group':

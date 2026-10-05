@@ -82,6 +82,30 @@ export function validateGroupForm(form) {
   return errors;
 }
 
+const VIDEO_URL_REGEX = /^https?:\/\/\S+\.(mp4|webm)(\?\S*)?$/i;
+
+export function validatePostForm(form) {
+  const errors = {};
+  const title = form.title.trim();
+  const content = form.content.trim();
+  const course = form.course.trim();
+  const videoUrl = form.videoUrl.trim();
+
+  if (title.length < 3 || title.length > 100) {
+    errors.title = 'Title must be 3-100 characters';
+  }
+  if (content.length < 1 || content.length > 5000) {
+    errors.content = 'Content must be 1-5000 characters';
+  }
+  if (course.length < 2 || course.length > 60) {
+    errors.course = 'Course must be 2-60 characters';
+  }
+  if (videoUrl !== '' && (videoUrl.length > 500 || !VIDEO_URL_REGEX.test(videoUrl))) {
+    errors.videoUrl = 'Must be an http(s) link to a .mp4 or .webm file';
+  }
+  return errors;
+}
+
 // True when the errors object has no keys
 export function isValid(errors) {
   return Object.keys(errors).length === 0;

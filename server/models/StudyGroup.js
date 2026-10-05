@@ -97,6 +97,12 @@ function removeMember(groupId, userId) {
   return StudyGroup.findByIdAndUpdate(groupId, { $pull: { members: userId } }, { new: true });
 }
 
+// Is userId in the group's members list? (works on a group loaded with
+// findGroupById, where members are ids). Used by group and post controllers.
+function isGroupMember(group, userId) {
+  return group.members.some((memberId) => memberId.toString() === userId);
+}
+
 // Used when a user deletes their account
 function countGroupsOwnedBy(userId) {
   return StudyGroup.countDocuments({ owner: userId });
@@ -116,6 +122,7 @@ module.exports = {
   deleteGroup,
   addMember,
   removeMember,
+  isGroupMember,
   countGroupsOwnedBy,
   removeUserFromAllGroups
 };

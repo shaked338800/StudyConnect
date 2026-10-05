@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import GroupForm from '../components/GroupForm';
+import PostCard from '../components/PostCard';
+import PostForm from '../components/PostForm';
 import { getGroup, updateGroup, deleteGroup, joinGroup, leaveGroup } from '../api/groupsApi';
+import { getPosts, createPost } from '../api/postsApi';
 import { notify } from '../jquery/notify';
 
 // [REQ-19 StudyGroup - Update + Delete] + Join / Leave
@@ -11,12 +14,24 @@ function GroupPage({ groupId, user, onNavigate }) {
   const [notFound, setNotFound] = useState(false);
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [posts, setPosts] = useState([]);
+  const [writingPost, setWritingPost] = useState(false);
+
+  async function loadPosts() {
+    try {
+      const data = await getPosts({ group: groupId });
+      setPosts(data.posts);
+    } catch {
+      // toast shown by global ajaxError
+    }
+  }
 
   useEffect(() => {
     async function loadGroup() {
       try {
         const data = await getGroup(groupId);
         setGroup(data.group);
+        loadPosts();
       } catch {
         setNotFound(true); // toast shown by global ajaxError
       }
@@ -63,8 +78,16 @@ function GroupPage({ groupId, user, onNavigate }) {
     notify('Group updated', 'success');
   }
 
+  // New post inside this group (the server checks that I am a member)
+  async function handleCreatePost(data) {
+    await createPost({ ...data, group: group._id });
+    setWritingPost(false);
+    notify('Post published in ' + group.name, 'success');
+    loadPosts();
+  }
+
   async function handleDelete() {
-    if (!window.confirm('Delete the group "' + group.name + '"? This cannot be undone.')) return;
+    if (!window.confirm('Delete the group "' + group.name + '" and all its posts? This cannot be undone.')) return;
     try {
       await deleteGroup(group._id);
       notify('Group deleted', 'info');
@@ -120,6 +143,29 @@ function GroupPage({ groupId, user, onNavigate }) {
             </div>
           </>
         )}
+      </section>
+
+      <section className="card">
+        <div className="card-title-row">
+          <h3>Posts in this group ({posts.length})</h3>
+          {isMember && !writingPost && (
+            <button className="btn" onClick={() => setWritingPost(true)}>+ New post</button>
+          )}
+        </div>
+        {!isMember && <p className="muted small">Join the group to post here.</p>}
+
+        {writingPost && (
+          <div className="inner-form">
+            <PostForm submitLabel="Publish" onSubmit={handleCreatePost} onCancel={() => setWritingPost(false)} />
+          </div>
+        )}
+
+        {posts.length === 0 && <p className="muted">No posts in this group yet.</p>}
+        <div className="post-list">
+          {posts.map((post) => (
+            <PostCard key={post._id} post={post} showGroup={false} onOpen={(postId) => onNavigate('post', { postId })} />
+          ))}
+        </div>
       </section>
 
       <section className="card">
