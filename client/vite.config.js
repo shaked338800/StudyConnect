@@ -9,7 +9,9 @@ export default defineConfig({
     // Development only: forward /api requests to the Express server,
     // so the browser sees one origin (no CORS needed).
     proxy: {
-      '/api': 'http://localhost:3000'
+      '/api': 'http://localhost:3000',
+      // Socket.io (chat). ws: true also forwards the WebSocket connection.
+      '/socket.io': { target: 'http://localhost:3000', ws: true }
     }
   }
 });

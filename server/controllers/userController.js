@@ -9,6 +9,7 @@ const {
 } = require('../models/User');
 const { countGroupsOwnedBy, removeUserFromAllGroups } = require('../models/StudyGroup');
 const { deletePostsByAuthor } = require('../models/Post');
+const { deleteMessagesBySender } = require('../models/Message');
 const { isString, validateProfileUpdate } = require('../utils/validators');
 const escapeRegex = require('../utils/escapeRegex');
 
@@ -91,8 +92,9 @@ async function deleteMyAccount(req, res, next) {
     });
   }
 
-  // The user's posts are deleted with the account (later: their chat messages too)
+  // The user's posts and chat messages are deleted with the account
   await deletePostsByAuthor(req.userId);
+  await deleteMessagesBySender(req.userId);
   await removeUserFromAllGroups(req.userId);
   await deleteUserById(req.userId);
 

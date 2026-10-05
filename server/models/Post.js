@@ -87,7 +87,7 @@ function searchPosts({ keywordRegex, courseRegex, authorId, dateFrom, dateTo }) 
 }
 
 function updatePost(id, changes) {
-  return Post.findByIdAndUpdate(id, { $set: changes }, { new: true, runValidators: true });
+  return Post.findByIdAndUpdate(id, { $set: changes }, { returnDocument: 'after', runValidators: true });
 }
 
 function deletePost(id) {

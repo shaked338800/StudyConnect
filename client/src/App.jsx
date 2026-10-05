@@ -13,6 +13,7 @@ import PostsPage from './pages/PostsPage';
 import PostPage from './pages/PostPage';
 import { getMe, logout } from './api/authApi';
 import { notify } from './jquery/notify';
+import socket from './socket';
 
 // Pages that a guest (not logged in) is allowed to see
 const GUEST_PAGES = ['login', 'register'];
@@ -46,6 +47,16 @@ function App() {
     }
     checkSession();
   }, []);
+
+  // [REQ-28] Socket.io connection follows the login state: connect when a user
+  // is logged in (the cookie identifies them), disconnect on logout.
+  // A new login gets a new session cookie, so we reconnect when the user changes.
+  const userId = user ? user._id : null;
+  useEffect(() => {
+    if (!userId) return;
+    socket.connect();
+    return () => socket.disconnect();
+  }, [userId]);
 
   // [REQ-25 jQuery] If ANY request returns 401 (session expired / logged out),
   // forget the user so the login page is shown.

@@ -102,7 +102,7 @@ function listUsers(searchRegex) {
 }
 
 function updateUser(id, changes) {
-  return User.findByIdAndUpdate(id, { $set: changes }, { new: true, runValidators: true });
+  return User.findByIdAndUpdate(id, { $set: changes }, { returnDocument: 'after', runValidators: true });
 }
 
 function deleteUserById(id) {

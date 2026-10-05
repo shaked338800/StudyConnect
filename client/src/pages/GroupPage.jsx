@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import GroupForm from '../components/GroupForm';
 import PostCard from '../components/PostCard';
 import PostForm from '../components/PostForm';
+import ChatBox from '../components/ChatBox';
 import { getGroup, updateGroup, deleteGroup, joinGroup, leaveGroup } from '../api/groupsApi';
 import { getPosts, createPost } from '../api/postsApi';
 import { notify } from '../jquery/notify';
@@ -16,6 +17,7 @@ function GroupPage({ groupId, user, onNavigate }) {
   const [busy, setBusy] = useState(false);
   const [posts, setPosts] = useState([]);
   const [writingPost, setWritingPost] = useState(false);
+  const [showChat, setShowChat] = useState(false);
 
   async function loadPosts() {
     try {
@@ -142,6 +144,22 @@ function GroupPage({ groupId, user, onNavigate }) {
               )}
             </div>
           </>
+        )}
+      </section>
+
+      {/* [REQ-28] Group chat - members only (the server checks membership too) */}
+      <section className="card">
+        <div className="card-title-row">
+          <h3>Group chat</h3>
+          {isMember && (
+            <button className="btn" onClick={() => setShowChat(!showChat)}>
+              {showChat ? 'Close chat' : 'Open chat'}
+            </button>
+          )}
+        </div>
+        {!isMember && <p className="muted small">Join the group to use its chat.</p>}
+        {isMember && showChat && (
+          <ChatBox groupId={group._id} user={user} onChatClosed={() => setShowChat(false)} />
         )}
       </section>
 

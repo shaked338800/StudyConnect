@@ -97,7 +97,7 @@ function searchGroups({ courseRegex, institutionRegex, studyFormat, onlyOpenSpot
 }
 
 function updateGroup(id, changes) {
-  return StudyGroup.findByIdAndUpdate(id, { $set: changes }, { new: true, runValidators: true });
+  return StudyGroup.findByIdAndUpdate(id, { $set: changes }, { returnDocument: 'after', runValidators: true });
 }
 
 function deleteGroup(id) {
@@ -116,12 +116,12 @@ function addMember(groupId, userId) {
       $expr: { $lt: [{ $size: '$members' }, '$maxMembers'] }
     },
     { $addToSet: { members: userId } },
-    { new: true }
+    { returnDocument: 'after' }
   );
 }
 
 function removeMember(groupId, userId) {
-  return StudyGroup.findByIdAndUpdate(groupId, { $pull: { members: userId } }, { new: true });
+  return StudyGroup.findByIdAndUpdate(groupId, { $pull: { members: userId } }, { returnDocument: 'after' });
 }
 
 // Is userId in the group's members list? (works on a group loaded with

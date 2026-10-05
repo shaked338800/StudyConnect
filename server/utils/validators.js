@@ -228,9 +228,21 @@ function parseGroupSearch(query) {
   };
 }
 
+// [REQ-28] Chat message text (used by the socket handler and the edit route)
+function validateMessageText(text) {
+  if (!isString(text) || text.trim().length < 1) {
+    return 'Message cannot be empty';
+  }
+  if (text.trim().length > 1000) {
+    return 'Message must be at most 1000 characters';
+  }
+  return null;
+}
+
 module.exports = {
   isString,
   isValidObjectId,
+  validateMessageText,
   validateRegister,
   validateLogin,
   validateProfileUpdate,

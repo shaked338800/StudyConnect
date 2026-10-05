@@ -1,13 +1,17 @@
 // Entry point: creates the HTTP server and starts listening.
 // We use http.createServer (instead of app.listen) so Socket.io can be
-// attached to the same server later (Phase 6).
+// attached to the same server: Express and the chat share one port.
 const http = require('http');
 const app = require('./app');
 const { connectToDatabase } = require('./config/db');
+const { initChat } = require('./sockets/chatSocket');
 
 const PORT = process.env.PORT || 3000;
 
 const server = http.createServer(app);
+
+// [REQ-28] Attach Socket.io (real-time group chat) to the same HTTP server
+initChat(server);
 
 server.on('error', (err) => {
   if (err.code === 'EADDRINUSE') {

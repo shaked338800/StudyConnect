@@ -12,6 +12,8 @@ const {
   searchGroups
 } = require('../models/StudyGroup');
 const { deletePostsByGroup } = require('../models/Post');
+const { deleteMessagesByGroup } = require('../models/Message');
+const { removeUserFromGroupChat, closeGroupChat } = require('../sockets/chatSocket');
 const { isString, validateGroup, parseGroupSearch } = require('../utils/validators');
 const escapeRegex = require('../utils/escapeRegex');
 
@@ -124,9 +126,11 @@ async function deleteExistingGroup(req, res) {
     return res.status(403).json({ error: 'Only the group owner can delete this group' });
   }
 
-  // Deleting a group also deletes its posts (later: its chat messages too)
+  // Deleting a group also deletes its posts and chat messages, and closes its chat room
   await deletePostsByGroup(group._id);
+  await deleteMessagesByGroup(group._id);
   await deleteGroup(group._id);
+  closeGroupChat(group._id);
   res.json({ message: 'Group deleted' });
 }
 
@@ -167,6 +171,8 @@ async function leaveGroup(req, res) {
   }
 
   await removeMember(group._id, req.userId);
+  // [REQ-28] Stop sending this group's chat messages to the user right away
+  await removeUserFromGroupChat(group._id, req.userId);
   res.json({ group: await findGroupDetails(group._id) });
 }
 
