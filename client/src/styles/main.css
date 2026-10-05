@@ -585,6 +585,125 @@ code {
   font-variant-numeric: tabular-nums;
 }
 
+/* ---- [AI feature] AI Quiz ---- */
+
+.ai-loading {
+  padding: 12px;
+  background: #f3f0ff;
+  border-radius: var(--radius); /* [REQ-27 border-radius] */
+  color: #5f3dc4;
+  font-weight: 600;
+}
+
+.ai-error {
+  padding: 10px 12px;
+  background: #fff5f5;
+  border: 1px solid #ffc9c9;
+  border-radius: var(--radius); /* [REQ-27 border-radius] */
+  color: var(--color-bad);
+}
+
+.quiz-questions {
+  padding-left: 20px;
+}
+
+.quiz-question {
+  margin-bottom: 18px;
+}
+
+.quiz-question-text {
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.quiz-options {
+  display: grid;
+  gap: 6px;
+}
+
+.quiz-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  padding: 8px 12px;
+  background: #fff;
+  border: 1px solid #ced4da;
+  border-radius: 8px; /* [REQ-27 border-radius] */
+  font: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease; /* [REQ-27 transition] */
+}
+
+.quiz-option:hover:not(:disabled) {
+  border-color: var(--color-primary);
+}
+
+.quiz-option:disabled {
+  cursor: default;
+  color: inherit;
+}
+
+.quiz-option.selected {
+  border-color: var(--color-primary);
+  background: #e7ecff;
+}
+
+.quiz-option.correct {
+  border-color: var(--color-good);
+  background: #d3f9d8;
+}
+
+.quiz-option.wrong {
+  border-color: var(--color-bad);
+  background: #ffe3e3;
+}
+
+.quiz-letter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 50%; /* [REQ-27 border-radius] */
+  background: #eef0f5;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.quiz-result {
+  margin: 8px 0 0;
+  font-size: 0.9rem;
+}
+
+.quiz-result.good {
+  color: var(--color-good);
+  font-weight: 600;
+}
+
+.quiz-result.bad {
+  color: var(--color-bad);
+  font-weight: 600;
+}
+
+.quiz-explanation {
+  color: var(--color-text);
+  font-weight: 400;
+}
+
+.quiz-score-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.quiz-score {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--color-primary-dark);
+}
+
 /* ---- [REQ-28] Group chat ---- */
 
 .chat {

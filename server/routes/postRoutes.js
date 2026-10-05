@@ -11,6 +11,7 @@ const {
   updateExistingPost,
   deleteExistingPost
 } = require('../controllers/postController');
+const { generatePostQuiz } = require('../controllers/aiController');
 
 const router = express.Router();
 
@@ -25,5 +26,8 @@ router.get('/search', advancedSearchPosts);
 router.get('/:id', validateId, getPost);
 router.put('/:id', validateId, updateExistingPost);
 router.delete('/:id', validateId, deleteExistingPost);
+
+// [AI feature] Generate a quiz from this post (the AI call happens on the server)
+router.post('/:id/ai-quiz', validateId, generatePostQuiz);
 
 module.exports = router;

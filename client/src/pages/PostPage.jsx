@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import PostForm from '../components/PostForm';
 import VideoPlayer from '../components/VideoPlayer';
+import AiQuiz from '../components/AiQuiz';
 import { getPost, updatePost, deletePost } from '../api/postsApi';
 import { notify } from '../jquery/notify';
 
@@ -66,57 +67,62 @@ function PostPage({ postId, user, onNavigate }) {
   }
 
   return (
-    <section className="card">
-      <button className="link-button" onClick={goBack}>
-        &larr; Back to {post.group ? post.group.name : 'Posts'}
-      </button>
+    <>
+      <section className="card">
+        <button className="link-button" onClick={goBack}>
+          &larr; Back to {post.group ? post.group.name : 'Posts'}
+        </button>
 
-      {editing ? (
-        <>
-          <h2>Edit post</h2>
-          <PostForm post={post} submitLabel="Save changes" onSubmit={handleUpdate} onCancel={() => setEditing(false)} />
-        </>
-      ) : (
-        <article>
-          <h2>{post.title}</h2>
-          <p className="muted">
-            By{' '}
-            <button className="link-button" onClick={() => onNavigate('user', { userId: post.author._id })}>
-              {post.author.fullName}
-            </button>
-            {' '}· {new Date(post.createdAt).toLocaleString()}
-            {post.updatedAt !== post.createdAt && ' (edited)'}
-            {post.group && (
-              <>
-                {' '}· in{' '}
-                <button className="link-button" onClick={() => onNavigate('group', { groupId: post.group._id })}>
-                  {post.group.name}
-                </button>
-              </>
+        {editing ? (
+          <>
+            <h2>Edit post</h2>
+            <PostForm post={post} submitLabel="Save changes" onSubmit={handleUpdate} onCancel={() => setEditing(false)} />
+          </>
+        ) : (
+          <article>
+            <h2>{post.title}</h2>
+            <p className="muted">
+              By{' '}
+              <button className="link-button" onClick={() => onNavigate('user', { userId: post.author._id })}>
+                {post.author.fullName}
+              </button>
+              {' '}· {new Date(post.createdAt).toLocaleString()}
+              {post.updatedAt !== post.createdAt && ' (edited)'}
+              {post.group && (
+                <>
+                  {' '}· in{' '}
+                  <button className="link-button" onClick={() => onNavigate('group', { groupId: post.group._id })}>
+                    {post.group.name}
+                  </button>
+                </>
+              )}
+            </p>
+            <div className="badges"><span className="badge">{post.course}</span></div>
+
+            {/* white-space: pre-wrap keeps the line breaks the author typed */}
+            <p className="post-content">{post.content}</p>
+
+            {/* [REQ-26] HTML5 video. key: a changed URL creates a fresh player */}
+            {post.videoUrl && (
+              <div className="post-video">
+                <h3>Video</h3>
+                <VideoPlayer key={post.videoUrl} src={post.videoUrl} />
+              </div>
             )}
-          </p>
-          <div className="badges"><span className="badge">{post.course}</span></div>
 
-          {/* white-space: pre-wrap keeps the line breaks the author typed */}
-          <p className="post-content">{post.content}</p>
+            {isAuthor && (
+              <div className="button-row">
+                <button className="btn" onClick={() => setEditing(true)}>Edit post</button>
+                <button className="btn btn-danger" onClick={handleDelete}>Delete post</button>
+              </div>
+            )}
+          </article>
+        )}
+      </section>
 
-          {/* [REQ-26] HTML5 video. key: a changed URL creates a fresh player */}
-          {post.videoUrl && (
-            <div className="post-video">
-              <h3>Video</h3>
-              <VideoPlayer key={post.videoUrl} src={post.videoUrl} />
-            </div>
-          )}
-
-          {isAuthor && (
-            <div className="button-row">
-              <button className="btn" onClick={() => setEditing(true)}>Edit post</button>
-              <button className="btn btn-danger" onClick={handleDelete}>Delete post</button>
-            </div>
-          )}
-        </article>
-      )}
-    </section>
+      {/* [AI feature] key: after the post is edited, an old quiz is cleared */}
+      {!editing && <AiQuiz key={post._id + post.updatedAt} postId={post._id} />}
+    </>
   );
 }
 

@@ -53,6 +53,20 @@ export function updatePost(id, data) {
   });
 }
 
+// [AI feature] Ask OUR server for an AI quiz about this post.
+// The server talks to the AI provider - the browser never sees the API key.
+// - timeout: AI answers can take several seconds (default is 10s)
+// - global: false: AiQuiz shows its own loading/error state instead of the
+//   global spinner and error toast
+export function generateAiQuiz(postId) {
+  return $.ajax({
+    url: '/api/posts/' + encodeURIComponent(postId) + '/ai-quiz',
+    type: 'POST',
+    timeout: 45000,
+    global: false
+  });
+}
+
 export function deletePost(id) {
   return $.ajax({
     url: '/api/posts/' + encodeURIComponent(id),
