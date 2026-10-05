@@ -1,0 +1,21 @@
+/* [REQ-27 @font-face] Load the "Nunito" web font from a file inside our
+   project (client/src/assets/fonts). No external server is needed, so it also
+   works offline in the lab. License: SIL OFL 1.1 (see assets/fonts/OFL.txt).
+
+   It is a "variable" font: one file contains every weight from 200 to 1000. */
+@font-face {
+  font-family: 'Nunito';
+  src: url('../assets/fonts/Nunito-VariableFont_wght.ttf') format('truetype');
+  font-weight: 200 1000;
+  font-style: normal;
+  font-display: swap; /* show fallback text until the font has loaded */
+}
+
+/* Headings and the logo use the web font; if it fails, the system font is used */
+h1,
+h2,
+h3,
+.logo {
+  font-family: 'Nunito', system-ui, 'Segoe UI', sans-serif;
+  font-weight: 800;
+}

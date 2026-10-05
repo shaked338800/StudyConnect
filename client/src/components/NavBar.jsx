@@ -21,6 +21,7 @@ function NavBar({ user, page, onNavigate, onLogout }) {
             {link('posts', 'Posts')}
             {link('groups', 'Groups')}
             {link('people', 'People')}
+            {link('sketch', 'Sketch')}
             {link('myProfile', 'My Profile')}
             <span className="nav-user">@{user.username}</span>
             <button className="nav-link" onClick={onLogout}>Logout</button>

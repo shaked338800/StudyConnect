@@ -82,7 +82,9 @@ export function validateGroupForm(form) {
   return errors;
 }
 
-const VIDEO_URL_REGEX = /^https?:\/\/\S+\.(mp4|webm)(\?\S*)?$/i;
+// [REQ-26] Same rule as the server: https://...mp4/.webm, or a path on our
+// site like /videos/flower.mp4. (?!\/) blocks "//other-site.com/..." links.
+export const VIDEO_URL_REGEX = /^(https?:\/\/\S+|\/(?!\/)\S+)\.(mp4|webm)(\?\S*)?$/i;
 
 export function validatePostForm(form) {
   const errors = {};
@@ -101,7 +103,7 @@ export function validatePostForm(form) {
     errors.course = 'Course must be 2-60 characters';
   }
   if (videoUrl !== '' && (videoUrl.length > 500 || !VIDEO_URL_REGEX.test(videoUrl))) {
-    errors.videoUrl = 'Must be an http(s) link to a .mp4 or .webm file';
+    errors.videoUrl = 'Must link to a .mp4 or .webm file (https://... or /videos/...)';
   }
   return errors;
 }

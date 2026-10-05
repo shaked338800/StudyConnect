@@ -93,8 +93,11 @@ function validateGroup(body) {
   );
 }
 
-// A direct link to a video file, e.g. https://example.com/lecture.mp4
-const VIDEO_URL_REGEX = /^https?:\/\/\S+\.(mp4|webm)(\?\S*)?$/i;
+// [REQ-26] A direct link to a video file that the HTML5 <video> element can play:
+// - a full link:          https://example.com/lecture.mp4
+// - or a path on our site: /videos/flower.webm  (files in client/public/videos)
+// (?!\/) blocks "//other-site.com/..." links that only look like paths.
+const VIDEO_URL_REGEX = /^(https?:\/\/\S+|\/(?!\/)\S+)\.(mp4|webm)(\?\S*)?$/i;
 
 // Fields that can be set when creating AND editing a post.
 // (group is only chosen on create - it is checked in the controller)
@@ -110,7 +113,7 @@ function validatePost(body) {
   }
   if (body.videoUrl !== undefined && body.videoUrl !== '') {
     if (!isString(body.videoUrl) || body.videoUrl.length > 500 || !VIDEO_URL_REGEX.test(body.videoUrl.trim())) {
-      return 'Video URL must be an http(s) link to a .mp4 or .webm file';
+      return 'Video URL must link to a .mp4 or .webm file (https://... or /videos/...)';
     }
   }
   return null;

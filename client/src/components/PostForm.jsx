@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import FormField from './FormField';
-import { validatePostForm, isValid } from '../utils/validation';
+import VideoPlayer from './VideoPlayer';
+import { validatePostForm, isValid, VIDEO_URL_REGEX } from '../utils/validation';
 
 const EMPTY_POST = { title: '', content: '', course: '', videoUrl: '', group: '' };
 
@@ -61,7 +62,17 @@ function PostForm({ post, groupOptions, submitLabel, onSubmit, onCancel }) {
       <FormField label="Title *" name="title" value={form.title} onChange={handleChange} error={errors.title} maxLength={100} />
       <FormField label="Course *" name="course" value={form.course} onChange={handleChange} error={errors.course} maxLength={60} placeholder="e.g. Algorithms" />
       <FormField label="Content *" name="content" multiline value={form.content} onChange={handleChange} error={errors.content} maxLength={5000} />
-      <FormField label="Video URL (.mp4 / .webm, optional)" name="videoUrl" type="url" value={form.videoUrl} onChange={handleChange} error={errors.videoUrl} maxLength={500} placeholder="https://example.com/lecture.mp4" />
+      <FormField label="Video URL (.mp4 / .webm, optional)" name="videoUrl" value={form.videoUrl} onChange={handleChange} error={errors.videoUrl} maxLength={500} placeholder="https://example.com/lecture.mp4" />
+      <p className="muted small field-hint">
+        Sample videos included with the app: <code>/videos/flower.mp4</code> or <code>/videos/flower.webm</code>
+      </p>
+      {/* [REQ-26] Live preview once the URL looks like a video file */}
+      {VIDEO_URL_REGEX.test(form.videoUrl.trim()) && (
+        <div className="video-preview">
+          <p className="muted small">Preview:</p>
+          <VideoPlayer key={form.videoUrl.trim()} src={form.videoUrl.trim()} />
+        </div>
+      )}
       {groupOptions && (
         <FormField label="Post in group (optional)" name="group" value={form.group} onChange={handleChange}
           options={groupOptions} emptyLabel="No group - a standalone post" />

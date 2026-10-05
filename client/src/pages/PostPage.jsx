@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import PostForm from '../components/PostForm';
+import VideoPlayer from '../components/VideoPlayer';
 import { getPost, updatePost, deletePost } from '../api/postsApi';
 import { notify } from '../jquery/notify';
 
@@ -99,12 +100,12 @@ function PostPage({ postId, user, onNavigate }) {
           {/* white-space: pre-wrap keeps the line breaks the author typed */}
           <p className="post-content">{post.content}</p>
 
+          {/* [REQ-26] HTML5 video. key: a changed URL creates a fresh player */}
           {post.videoUrl && (
-            <p>
-              <strong>Video:</strong>{' '}
-              <a href={post.videoUrl} target="_blank" rel="noopener noreferrer">{post.videoUrl}</a>
-              <span className="muted small"> (video player coming in Phase 7)</span>
-            </p>
+            <div className="post-video">
+              <h3>Video</h3>
+              <VideoPlayer key={post.videoUrl} src={post.videoUrl} />
+            </div>
           )}
 
           {isAuthor && (
