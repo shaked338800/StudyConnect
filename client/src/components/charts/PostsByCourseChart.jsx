@@ -71,7 +71,7 @@ function PostsByCourseChart({ data }) {
 
     // 5. X axis with the course names (shortened only if they don't fit their slot)
     const tilted = data.length > 5;
-    const maxChars = tilted ? 16 : Math.max(6, Math.floor(x.step() / CHAR_WIDTH));
+    const maxChars = tilted ? 22 : Math.max(6, Math.floor(x.step() / CHAR_WIDTH));
     const xAxis = chart.append('g')
       .attr('transform', `translate(0,${innerHeight})`)
       .call(d3.axisBottom(x).tickFormat((name) => shortName(name, maxChars)).tickSizeOuter(0))
@@ -83,9 +83,14 @@ function PostsByCourseChart({ data }) {
       xAxis.selectAll('text').attr('text-anchor', 'end').attr('transform', 'rotate(-30)').attr('dx', '-0.4em').attr('dy', '0.6em');
     }
 
-    // 6. Axis titles
+    // 6. Axis titles. "Course" goes below the course names: we measure how tall
+    // the X axis really is (tilted names need more room), and make the SVG
+    // taller if needed so the title is never cut off.
+    const xAxisHeight = xAxis.node().getBBox().height;
+    const courseTitleY = innerHeight + Math.max(62, xAxisHeight + 22);
+    svg.attr('viewBox', `0 0 ${WIDTH} ${Math.max(HEIGHT, MARGIN.top + courseTitleY + 12)}`);
     chart.append('text')
-      .attr('x', innerWidth / 2).attr('y', innerHeight + 62)
+      .attr('x', innerWidth / 2).attr('y', courseTitleY)
       .attr('text-anchor', 'middle').attr('fill', TEXT_MUTED).attr('font-size', 13)
       .text('Course');
     chart.append('text')

@@ -60,6 +60,20 @@ cd ../server
 npm start                 # serves API + built React app on http://localhost:3000
 ```
 
+## Demo data (seed)
+
+```bash
+cd server
+npm run seed               # empty database: inserts the demo data
+                           # database with data: shows the counts and changes NOTHING
+npm run seed -- --confirm  # REPLACES all users, groups, posts and messages with the demo data
+```
+
+The demo data (`server/seed/demoData.js`): 6 users, 6 study groups, 44 posts spread over
+about 11 months, and 32 chat messages. Every demo user has the password **`Demo1234`**
+(stored as a bcrypt hash): `alice`, `bob`, `maya`, `daniel`, `noa`, `amit`.
+The seed never runs on a database whose name contains `test`.
+
 ## Secrets
 
 `server/.env` holds configuration and secrets and is **never committed** (see `.gitignore`).
